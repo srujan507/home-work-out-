@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Workout Hub</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#1a2233; --card2:#212b40; --accent:#ff7a45; --accent2:#4fc3f7;
+    --text:#eef2f8; --muted:#9aa8bd; --good:#4caf7d; --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:system-ui,Inter,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); line-height:1.6;}
+  header{padding:28px 20px 10px; text-align:center;}
+  header h1{font-size:1.8rem;}
+  header h1 span{color:var(--accent);}
+  header p{color:var(--muted); max-width:640px; margin:8px auto 0;}
+  .disclaimer{background:#3a2510; border:1px solid #b8863a; color:#ffd9a0; padding:12px 16px; border-radius:var(--radius); max-width:900px; margin:16px auto; font-size:.9rem;}
+  nav.tabs{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:10px 16px 20px; position:sticky; top:0; background:rgba(15,20,32,.95); z-index:10;}
+  nav.tabs button{background:var(--card); color:var(--text); border:1px solid #2e3a52; padding:10px 18px; border-radius:999px; cursor:pointer; font-size:.95rem; transition:.2s;}
+  nav.tabs button.active, nav.tabs button:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+  main{max-width:1000px; margin:0 auto; padding:0 16px 60px;}
+  section.page{display:none; animation:fade .3s ease;}
+  section.page.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  h2{margin:24px 0 12px; font-size:1.4rem;}
+  h3{margin:18px 0 8px; color:var(--accent2); font-size:1.1rem;}
+  .card{background:var(--card); border-radius:var(--radius); padding:16px 18px; margin-bottom:14px; border:1px solid #26314a;}
+  table{width:100%; border-collapse:collapse; font-size:.9rem;}
+  th,td{text-align:left; padding:8px 10px; border-bottom:1px solid #2a3550;}
+  th{color:var(--accent2);}
+  .day-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px;}
+  .day{background:var(--card); border-radius:var(--radius); padding:14px; border-left:5px solid var(--accent);}
+  .day b{display:block; margin-bottom:6px;}
+  .tag{display:inline-block; font-size:.7rem; padding:2px 8px; border-radius:999px; background:#2e3a52; margin:2px 2px 0 0;}
+  .tag.beg{background:#2e5e46;} .tag.int{background:#5e532e;} .tag.adv{background:#5e2e3a;}
+  details{background:var(--card); border:1px solid #26314a; border-radius:var(--radius); margin-bottom:10px; padding:12px 16px;}
+  details summary{cursor:pointer; font-weight:600; font-size:1.05rem;}
+  details summary:hover{color:var(--accent);}
+  .ex{background:var(--card2); border-radius:10px; padding:12px 14px; margin:10px 0;}
+  .ex h4{color:var(--text); margin-bottom:4px;}
+  .ex .meta{color:var(--muted); font-size:.85rem; margin-bottom:6px;}
+  .ex ol{margin:6px 0 6px 20px; font-size:.92rem;}
+  .alt{font-size:.85rem; color:var(--accent2);}
+  .pill-row{display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 20px;}
+  .pill-row button{background:var(--card2); border:1px solid #2e3a52; color:var(--text); padding:8px 16px; border-radius:999px; cursor:pointer; transition:.2s;}
+  .pill-row button.active{background:var(--accent2); color:#0f1420; font-weight:600;}
+  .week-card{border-left:5px solid var(--accent2);}
+  /* Tracker */
+  .tracker-grid{display:grid; grid-template-columns:1fr 1.4fr; gap:16px;}
+  @media(max-width:760px){.tracker-grid{grid-template-columns:1fr;}}
+  .progress-wrap{background:var(--card2); border-radius:999px; height:14px; overflow:hidden; margin:10px 0;}
+  .progress-bar{height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); width:0; transition:width .4s ease;}
+  .goal-msg{display:none; background:#1f3d2e; border:1px solid var(--good); color:#a8f0c8; padding:10px 14px; border-radius:10px; margin:10px 0; font-weight:600;}
+  .check-item{display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid #2a3550; cursor:pointer;}
+  .check-item input{margin-top:4px; accent-color:var(--accent); width:18px; height:18px; cursor:pointer;}
+  .check-item.done label{color:var(--muted); text-decoration:line-through;}
+  .target-input{width:80px; background:var(--card2); border:1px solid #2e3a52; color:var(--text); padding:6px 10px; border-radius:8px; font-size:1rem;}
+  .btn{background:var(--accent); color:#fff; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-size:.95rem; margin-top:10px; transition:.2s;}
+  .btn:hover{filter:brightness(1.1);}
+  select, option{background:var(--card2); color:var(--text); border:1px solid #2e3a52; padding:8px 10px; border-radius:8px; font-size:.95rem;}
+  label.small{font-size:.85rem; color:var(--muted);}
+  footer{text-align:center; color:var(--muted); padding:20px; font-size:.85rem;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏠 Home Workout <span>Hub</span></h1>
+  <p>Your complete bodyweight program — full muscle library, a 4-week beginner-to-advanced journey that keeps repeating forever, and a daily tracker to keep you honest. No gym required.</p>
+</header>
+
+<div class="disclaimer">⚠️ <strong>Health disclaimer:</strong> Consult a qualified healthcare professional before starting any exercise program, especially if you have health concerns, injuries, or are pregnant. Stop immediately if you feel pain, dizziness, chest pain, or unusual symptoms. Results vary — no outcome is guaranteed.</div>
+
+<nav class="tabs" role="tablist">
+  <button class="active" data-page="schedule">📅 Weekly Schedule</button>
+  <button data-page="library">📚 Exercise Library</button>
+  <button data-page="progression">🚀 Progression Plan</button>
+  <button data-page="tracker">✅ Daily Tracker</button>
+</nav>
+
+<main>
+<!-- ================= SCHEDULE ================= -->
+<section class="page active" id="schedule">
+  <h2>📅 Weekly Schedule — One Muscle Focus Per Day</h2>
+  <p style="color:var(--muted); margin-bottom:14px;">Each day targets specific muscle groups. Sunday is full recovery — rest is where growth happens. Always warm up 5 minutes before and cool down/stretch 5 minutes after every session. Stay hydrated throughout the day. After Week 4, this same weekly cycle repeats indefinitely.</p>
+  <div class="day-grid">
+    <div class="day"><b>Monday — Chest 💥</b><span class="tag beg">Beginner wk1</span><span class="tag adv">Advanced wk4+</span>Push-ups, incline/decline variations, dips, pike presses.</div>
+    <div class="day"><b>Tuesday — Back & Shoulders 🏋️</b><span class="tag beg">Beginner wk1</span><span class="tag adv">Advanced wk4+</span>Supermans, pull-ups, pike push-ups, shoulder taps.</div>
+    <div class="day"><b>Wednesday — Arms (Biceps, Triceps, Forearms) 💪</b><span class="tag beg">Beginner wk1</span><span class="tag adv">Advanced wk4+</span>Triceps dips, chair curls, wrist & grip work.</div>
+    <div class="day"><b>Thursday — Legs (Quads, Hamstrings, Calves) 🦵</b><span class="tag beg">Beginner wk1</span><span class="tag adv">Advanced wk4+</span>Squats, lunges, glute bridges, calf raises.</div>
+    <div class="day"><b>Friday — Glutes & Core 🔥</b><span class="tag beg">Beginner wk1</span><span class="tag adv">Advanced wk4+</span>Planks, crunches, hip thrusts, Russian twists.</div>
+    <div class="day"><b>Saturday — Full Body / Weak Points 🔄</b><span class="tag beg">Beginner wk1</span><span class="tag adv">Advanced wk4+</span>Circuits hitting every muscle group lightly.</div>
+    <div class="day" style="border-left-color:var(--good);"><b>Sunday — Rest & Recovery 😴</b>Light stretching, walking, hydration. Never skip rest — muscles grow on rest days.</div>
+  </div>
+</section>
+
+<!-- ================= LIBRARY ================= -->
+<section class="page" id="library">
+  <h2>📚 Exercise Library — By Muscle Group</h2>
+  <p style="color:var(--muted); margin-bottom:14px;">Every exercise lists the muscles affected, step-by-step instructions, sets/reps/rest, difficulty, and a household alternative if you need one. Expand a muscle group below.</p>
+
+<details open>
+    <summary>💥 Chest</summary>
+    <div class="ex"><h4>Wall Push-up <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Pectorals (chest), front deltoids, triceps</div><ol><li>Stand arm's length from a wall, palms flat on it at shoulder height, slightly wider than shoulders.</li><li>Lean in, keeping body straight from head to heels.</li><li>Bend elbows to lower chest toward the wall.</li><li>Push back to start. Keep core tight.</li></ol><div class="meta">3 sets × 12–15 reps · Rest 60s</div><div class="alt">🏠 Alternative: none needed — it IS the household version.</div></div>
+    <div class="ex"><h4>Knee Push-up <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Pectorals, front deltoids, triceps, core</div><ol><li>Start on hands and knees, hands slightly wider than shoulders.</li><li>Lower chest toward the floor with elbows at ~45°.</li><li>Push back up until arms are straight.</li></ol><div class="meta">3 sets × 8–12 reps · Rest 60s</div><div class="alt">🏠 Alternative: push-up against a sturdy table edge.</div></div>
+    <div class="ex"><h4>Standard Push-up <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Pectorals, front deltoids, triceps, serratus anterior, core</div><ol><li>High plank position, hands under shoulders, body in a straight line.</li><li>Lower chest to just above the floor, elbows at ~45°.</li><li>Drive through palms to press back up. No sagging hips.</li></ol><div class="meta">3–4 sets × 10–15 reps · Rest 60–90s</div><div class="alt">🏠 Alternative: knee push-ups or incline push-ups on a chair.</div></div>
+    <div class="ex"><h4>Diamond Push-up <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Inner pectorals, triceps, front deltoids</div><ol><li>Form a diamond/triangle with thumbs and index fingers under your chest.</li><li>Lower chest to hands, keeping elbows tucked in.</li><li>Press back up explosively.</li></ol><div class="meta">4 sets × 8–12 reps · Rest 90s</div><div class="alt">🏠 Alternative: narrow-grip knee push-ups.</div></div>
+    <div class="ex"><h4>Chair/Bench Triceps Dip <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Triceps, lower pectorals, front deltoids</div><ol><li>Hands on a chair edge behind you, legs extended forward, heels down.</li><li>Lower hips by bending elbows to ~90°.</li><li>Press back up through palms. Keep shoulders down.</li></ol><div class="meta">3 sets × 10–15 reps · Rest 60s</div><div class="alt">🏠 Alternative: bend knees to reduce load.</div></div>
+  </details>
+
+<details>
+    <summary>🏋️ Back</summary>
+    <div class="ex"><h4>Superman Hold <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Lower back (erector spinae), glutes, rear deltoids</div><ol><li>Lie face down, arms extended forward, legs straight.</li><li>Squeeze glutes and lift chest, arms, and legs off the floor.</li><li>Hold 2–3 seconds, lower with control.</li></ol><div class="meta">3 sets × 12 reps · Rest 60s</div><div class="alt">🏠 Alternative: bird-dog on hands and knees.</div></div>
+    <div class="ex"><h4>Towel Row (Door Anchor) <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Latissimus dorsi, rhomboids, mid-trapezius, rear deltoids, biceps</div><ol><li>Loop a towel around a sturdy door handle or pole.</li><li>Hold both ends, lean back with straight arms, feet planted.</li><li>Pull your chest toward the door by bending elbows back.</li><li>Lower slowly.</li></ol><div class="meta">3 sets × 12 reps · Rest 60s</div><div class="alt">🏠 Alternative: backpack loaded with books, bent-over rows.</div></div>
+    <div class="ex"><h4>Pull-up / Negative Pull-up <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Lats, mid-traps, rhomboids, biceps, forearms, core</div><ol><li>Hang from a bar, grip slightly wider than shoulders.</li><li>Pull chest toward the bar, squeezing shoulder blades.</li><li>Lower with control. (Beginners: jump up and lower slowly = negatives.)</li></ol><div class="meta">3 sets × 5–10 reps · Rest 90s</div><div class="alt">🏠 Alternative: door-frame rows or towel rows.</div></div>
+    <div class="ex"><h4>Archer Pull-up <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Lats (unilateral), biceps, rear deltoids, core</div><ol><li>Wide grip hang. Pull toward one hand while the opposite arm straightens.</li><li>Squeeze, return to center.</li><li>Alternate sides each rep.</li></ol><div class="meta">4 sets × 4–6 reps/side · Rest 120s</div><div class="alt">🏠 Alternative: weighted one-arm backpack rows.</div></div>
+  </details>
+
+<details>
+    <summary>🎯 Shoulders</summary>
+    <div class="ex"><h4>Pike Push-up <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Front & side deltoids, triceps, upper trapezius</div><ol><li>From push-up position, walk feet in and lift hips into an inverted V.</li><li>Lower the top of your head toward the floor between your hands.</li><li>Press back up. Keep hips high.</li></ol><div class="meta">3 sets × 8–12 reps · Rest 60s</div><div class="alt">🏠 Alternative: wall handstand hold (short holds).</div></div>
+    <div class="ex"><h4>Shoulder Taps <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Deltoids, core stabilizers, chest</div><ol><li>Hold a high plank, feet wide for stability.</li><li>Tap your left shoulder with your right hand, then swap.</li><li>Keep hips as still as possible.</li></ol><div class="meta">3 sets × 16 taps · Rest 60s</div><div class="alt">🏠 Alternative: do it on knees.</div></div>
+    <div class="ex"><h4>Elevated Pike Push-up <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: All three deltoid heads, triceps, upper traps</div><ol><li>Feet elevated on a chair in pike position.</li><li>Lower head between hands until it nearly touches the floor.</li><li>Press back up, fully extending arms.</li></ol><div class="meta">4 sets × 8–10 reps · Rest 90s</div><div class="alt">🏠 Alternative: standard pike push-up.</div></div>
+    <div class="ex"><h4>Wall Handstand Push-up <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Deltoids, triceps, trapezius, core, upper back</div><ol><li>Kick up into a handstand against a wall, arms locked.</li><li>Bend elbows to lower your head toward the floor.</li><li>Press back up to full lockout.</li></ol><div class="meta">4 sets × 4–8 reps · Rest 120s</div><div class="alt">🏠 Alternative: elevated pike push-ups.</div></div>
+  </details>
+
+<details>
+    <summary>💪 Biceps</summary>
+    <div class="ex"><h4>Towel Curl (Isometric) <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Biceps brachii, forearm flexors</div><ol><li>Loop a towel under one foot, hold both ends, elbow braced on thigh.</li><li>Curl your hand up while pulling down with the leg for resistance.</li><li>Slow 3-second lowering phase.</li></ol><div class="meta">3 sets × 12 reps/arm · Rest 45s</div><div class="alt">🏠 Alternative: filled water bottles or backpack curls.</div></div>
+    <div class="ex"><h4>Backpack Curl <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Biceps, forearm flexors</div><ol><li>Grip a loaded backpack by its handles.</li><li>Curl from full extension to shoulder height.</li><li>Squeeze at the top 1 second, lower for 3 seconds.</li></ol><div class="meta">3–4 sets × 10–12 reps · Rest 60s</div><div class="alt">🏠 Alternative: two large water jugs.</div></div>
+    <div class="ex"><h4>One-Armed Backpack Curl <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Biceps (unilateral), forearm flexors, grip</div><ol><li>Single-arm heavy backpack curl with a 3-second negative.</li><li>Keep elbow pinned to your side.</li><li>Full range, no swinging.</li></ol><div class="meta">4 sets × 6–8 reps/arm · Rest 90s</div><div class="alt">🏠 Alternative: slow-tempo two-arm curl with both jugs.</div></div>
+  </details>
+
+<details>
+    <summary>🔧 Triceps</summary>
+    <div class="ex"><h4>Bench/Chair Dip <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Triceps, front deltoids, lower chest</div><ol><li>Hands on chair edge, knees bent, feet flat.</li><li>Bend elbows to ~90°, keeping them pointing back.</li><li>Press up through palms.</li></ol><div class="meta">3 sets × 10–12 reps · Rest 60s</div><div class="alt">🏠 Alternative: wall push-offs.</div></div>
+    <div class="ex"><h4>Close-Grip Push-up <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Triceps, inner chest, front deltoids</div><ol><li>Hands directly under shoulders (narrower than normal).</li><li>Lower with elbows brushing your ribs.</li><li>Press up, locking out fully.</li></ol><div class="meta">3 sets × 10–15 reps · Rest 60s</div><div class="alt">🏠 Alternative: knee close-grip push-ups.</div></div>
+    <div class="ex"><h4>Dive-Bomber Push-up <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Triceps, shoulders, chest, core</div><ol><li>Start in downward-dog position.</li><li>Swoop your chest forward close to the floor until arms are vertical.</li><li>Press back and return along the same arc.</li></ol><div class="meta">4 sets × 8–10 reps · Rest 90s</div><div class="alt">🏠 Alternative: decline close-grip push-up (feet on chair).</div></div>
+  </details>
+
+<details>
+    <summary>✊ Forearms</summary>
+    <div class="ex"><h4>Towel Wring Squeeze <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Forearm flexors, grip muscles</div><ol><li>Hold a wet/damp towel with both hands.</li><li>Wring it hard in opposite directions for 20–30 seconds.</li><li>Rest and repeat, switching twist direction.</li></ol><div class="meta">3 sets × 30s · Rest 45s</div><div class="alt">🏠 Alternative: squeeze a tennis ball.</div></div>
+    <div class="ex"><h4>Dead Hang <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Forearm flexors, grip, lats, shoulder stabilizers</div><ol><li>Hang from a pull-up bar with straight arms.</li><li>Squeeze the bar hard, keep shoulders active.</li><li>Hold as long as possible with good form.</li></ol><div class="meta">3 sets × 30–45s · Rest 60s</div><div class="alt">🏠 Alternative: door-frame towel hangs.</div></div>
+    <div class="ex"><h4>One-Arm Hang <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Grip, forearms, lats, core</div><ol><li>Hang from the bar with one arm only.</li><li>Engage lats and core to stop swinging.</li><li>Hold for time, then switch arms.</li></ol><div class="meta">3 sets × 15–25s/arm · Rest 90s</div><div class="alt">🏠 Alternative: two-arm hang with a backpack on.</div></div>
+  </details>
+
+<details>
+    <summary>🦵 Quadriceps</summary>
+    <div class="ex"><h4>Bodyweight Squat <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Quadriceps, glutes, hamstrings, calves, core</div><ol><li>Feet shoulder-width, toes slightly out.</li><li>Sit back and down like reaching for a chair, chest up.</li><li>Descend until thighs are at least parallel, then drive through heels.</li></ol><div class="meta">3 sets × 12–15 reps · Rest 60s</div><div class="alt">🏠 Alternative: sit-to-stand from a chair.</div></div>
+    <div class="ex"><h4>Walking Lunges <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Quads, glutes, hamstrings, calves, core</div><ol><li>Step forward into a long stride.</li><li>Lower until both knees are ~90°, front knee over ankle.</li><li>Push through the front heel and bring the back leg forward.</li></ol><div class="meta">3 sets × 10/leg · Rest 60s</div><div class="alt">🏠 Alternative: stationary alternating lunges.</div></div>
+    <div class="ex"><h4>Pistol Squat <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Quads, glutes, hamstrings, ankle stabilizers, core</div><ol><li>Stand on one leg, other leg extended straight ahead.</li><li>Squat all the way down on one leg, keeping chest up and heel down.</li><li>Drive back up without the other foot touching.</li></ol><div class="meta">4 sets × 3–6 reps/leg · Rest 120s</div><div class="alt">🏠 Alternative: assisted pistol to a chair.</div></div>
+  </details>
+
+<details>
+    <summary>🍑 Hamstrings</summary>
+    <div class="ex"><h4>Glute Bridge (Hamstring Bias) <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Hamstrings, glutes, lower back</div><ol><li>Lie on your back, knees bent, heels close to glutes.</li><li>Drive through heels to lift hips, squeezing glutes.</li><li>Hold 2s, lower slowly without touching down between reps.</li></ol><div class="meta">3 sets × 15 reps · Rest 60s</div><div class="alt">🏠 Alternative: none needed.</div></div>
+    <div class="ex"><h4>Single-Leg Romanian Deadlift <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Hamstrings, glutes, lower back, balance stabilizers</div><ol><li>Stand on one leg, slight knee bend, hold a backpack.</li><li>Hinge at the hips, letting the other leg extend behind you.</li><li>Lower until hamstring stretch, then stand tall.</li></ol><div class="meta">3 sets × 10/leg · Rest 60s</div><div class="alt">🏠 Alternative: two-leg version with both feet down.</div></div>
+    <div class="ex"><h4>Nordic Curl (Assisted) <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Hamstrings (eccentric overload), glutes, calves</div><ol><li>Kneel with ankles anchored under a couch/bed.</li><li>Keep body straight from knees to head.</li><li>Lower forward as slowly as possible; catch yourself with hands and push back up.</li></ol><div class="meta">3–4 sets × 4–6 reps · Rest 120s</div><div class="alt">🏠 Alternative: slider hamstring curls with a towel on smooth floor.</div></div>
+  </details>
+
+<details>
+    <summary>🔥 Glutes</summary>
+    <div class="ex"><h4>Glute Bridge <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Glutes, hamstrings, lower back, core</div><ol><li>Lie on your back, knees bent, feet flat, hip-width.</li><li>Squeeze glutes and lift hips into a straight line knee-to-shoulder.</li><li>Hold 2s at the top, lower with control.</li></ol><div class="meta">3 sets × 15 reps · Rest 60s</div><div class="alt">🏠 Alternative: donkey kicks on all fours.</div></div>
+    <div class="ex"><h4>Bulgarian Split Squat <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Glutes, quads, hamstrings, core</div><ol><li>Rear foot on a chair, front leg forward in a lunge stance.</li><li>Lower straight down until the front thigh is parallel.</li><li>Drive up through the front heel.</li></ol><div class="meta">3 sets × 8–10/leg · Rest 90s</div><div class="alt">🏠 Alternative: reverse lunges.</div></div>
+    <div class="ex"><h4>Single-Leg Hip Thrust <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Glutes (peak contraction), hamstrings, core</div><ol><li>Upper back on a couch edge, one foot planted, other knee to chest.</li><li>Drive hips up until your torso is parallel to the floor.</li><li>Squeeze glutes hard 2s at the top, lower slowly.</li></ol><div class="meta">4 sets × 10–12/leg · Rest 90s</div><div class="alt">🏠 Alternative: backpack-loaded two-leg hip thrust.</div></div>
+  </details>
+
+<details>
+    <summary>🦶 Calves</summary>
+    <div class="ex"><h4>Standing Calf Raise <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Gastrocnemius, soleus</div><ol><li>Stand tall, rise up onto the balls of your feet.</li><li>Squeeze the calves hard at the top for 2s.</li><li>Lower slowly through full range.</li></ol><div class="meta">3 sets × 20 reps · Rest 45s</div><div class="alt">🏠 Alternative: single-leg version for more challenge.</div></div>
+    <div class="ex"><h4>Single-Leg Calf Raise <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Calves (unilateral), ankle stabilizers</div><ol><li>Stand on one foot near a wall for balance only.</li><li>Rise to your toes with a 2s squeeze at the top.</li><li>Lower for 3s. Full range on a step edge for extra stretch.</li></ol><div class="meta">3 sets × 15/leg · Rest 60s</div><div class="alt">🏠 Alternative: two-leg raises on a step.</div></div>
+    <div class="ex"><h4>Explosive Jump-Calf Raises <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Calves (fast-twitch), Achilles tendon, quads</div><ol><li>From standing, explode upward onto toes, leaving the floor slightly.</li><li>Land softly and immediately repeat.</li><li>Keep knees mostly straight — calves do the work.</li></ol><div class="meta">4 sets × 20 reps · Rest 60s</div><div class="alt">🏠 Alternative: single-leg slow raises on a step.</div></div>
+  </details>
+
+<details>
+    <summary>🧱 Core / Abs</summary>
+    <div class="ex"><h4>Plank <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Transverse abdominis, rectus abdominis, obliques, shoulders</div><ol><li>Forearms on the floor, elbows under shoulders, body in a straight line.</li><li>Squeeze abs and glutes, don't sag hips or pike up.</li><li>Breathe steadily and hold.</li></ol><div class="meta">3 sets × 20–40s · Rest 60s</div><div class="alt">🏠 Alternative: knee plank or incline plank on a chair.</div></div>
+    <div class="ex"><h4>Crunches <span class="tag beg">Beginner</span></h4><div class="meta">Muscles affected: Rectus abdominis ("six-pack"), obliques</div><ol><li>Lie on your back, knees bent, hands beside temples.</li><li>Curl shoulder blades off the floor using your abs.</li><li>Lower slowly. Don't pull on your neck.</li></ol><div class="meta">3 sets × 15 reps · Rest 45s</div><div class="alt">🏠 Alternative: dead bug on the floor.</div></div>
+    <div class="ex"><h4>Russian Twist <span class="tag int">Intermediate</span></h4><div class="meta">Muscles affected: Obliques, rectus abdominis, hip flexors</div><ol><li>Sit with knees bent, lean back to ~45°, feet lifted for difficulty.</li><li>Rotate your torso side to side, touching the floor.</li><li>Keep chest up, core braced.</li></ol><div class="meta">3 sets × 20 twists · Rest 60s</div><div class="alt">🏠 Alternative: slow Russian twist holding a water bottle.</div></div>
+    <div class="ex"><h4>Hollow Body Hold <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Entire anterior core, hip flexors</div><ol><li>Lie on your back, press lower back into the floor.</li><li>Lift shoulders and legs simultaneously, arms by ears.</li><li>Hold a shallow "banana" shape — no lower-back arching.</li></ol><div class="meta">4 sets × 20–40s · Rest 60s</div><div class="alt">🏠 Alternative: hollow body with bent knees (tuck hollow).</div></div>
+    <div class="ex"><h4>Hanging Leg Raise <span class="tag adv">Advanced</span></h4><div class="meta">Muscles affected: Lower abs, hip flexors, grip, lats</div><ol><li>Hang from a bar with straight arms, shoulders active.</li><li>Raise straight legs to at least hip height (toes to bar to advance).</li><li>Lower slowly with zero swinging.</li></ol><div class="meta">4 sets × 6–10 reps · Rest 90s</div><div class="alt">🏠 Alternative: lying leg raises on the floor.</div></div>
+  </details>
+</section>
+
+<!-- ================= PROGRESSION ================= -->
+<section class="page" id="progression">
+  <h2>🚀 Progression Plan — Beginner to Advanced, Then Repeat Forever</h2>
+  <p style="color:var(--muted); margin-bottom:14px;">Weeks 1–4 take you from beginner to advanced. From Week 5 onward, simply repeat the advanced weekly schedule for as long as you train — it never ends. Add reps, slower tempos, or harder variations over time to keep progressing.</p>
+  <div class="pill-row">
+    <button class="active" data-level="beg">🟢 Beginner (Week 1)</button>
+    <button data-level="int">🟡 Intermediate (Weeks 2–3)</button>
+    <button data-level="adv">🔴 Advanced (Week 4)</button>
+    <button data-level="loop">♾️ Week 5+ (Repeat)</button>
+  </div>
+  <div class="level" data-level="beg">
+    <div class="card week-card"><h3>Week 1 — Foundation 🟢</h3>
+      <p>Goal: learn form, build the habit. Easy versions, generous rest.</p>
+      <table><tr><th>Day</th><th>Focus</th><th>Exercises</th><th>Sets × Reps</th><th>Rest</th></tr>
+      <tr><td>Mon</td><td>Chest</td><td>Wall push-up, knee push-up</td><td>3 × 12, 3 × 8</td><td>60s</td></tr>
+      <tr><td>Tue</td><td>Back & Shoulders</td><td>Superman hold, towel row, shoulder taps, pike push-up</td><td>3 × 12, 3 × 12, 3 × 16, 3 × 8</td><td>60s</td></tr>
+      <tr><td>Wed</td><td>Arms</td><td>Towel curl, chair dip, towel wring</td><td>3 × 12, 3 × 10, 3 × 30s</td><td>60s</td></tr>
+      <tr><td>Thu</td><td>Legs</td><td>Bodyweight squat, glute bridge, calf raise</td><td>3 × 12, 3 × 15, 3 × 20</td><td>60s</td></tr>
+      <tr><td>Fri</td><td>Glutes & Core</td><td>Glute bridge, plank, crunches</td><td>3 × 15, 3 × 20s, 3 × 15</td><td>60s</td></tr>
+      <tr><td>Sat</td><td>Full body light circuit</td><td>10 squats, 8 knee push-ups, 15s plank, 10 calf raises</td><td>2 rounds</td><td>90s</td></tr>
+      <tr><td>Sun</td><td>Rest 😴</td><td>Light walk + stretching</td><td>—</td><td>—</td></tr></table>
+    </div>
+  </div>
+  <div class="level" data-level="int" hidden>
+    <div class="card week-card"><h3>Weeks 2–3 — Build 🟡</h3>
+      <p>Goal: add volume and harder variations. Rest drops slightly.</p>
+      <table><tr><th>Day</th><th>Focus</th><th>Exercises</th><th>Sets × Reps</th><th>Rest</th></tr>
+      <tr><td>Mon</td><td>Chest</td><td>Standard push-up, chair dips</td><td>4 × 12, 3 × 12</td><td>75s</td></tr>
+      <tr><td>Tue</td><td>Back & Shoulders</td><td>Negative pull-ups, pike push-ups, towel rows</td><td>4 × 5, 4 × 8, 3 × 12</td><td>90s</td></tr>
+      <tr><td>Wed</td><td>Arms</td><td>Backpack curls, close-grip push-ups, dead hang</td><td>3 × 10, 3 × 12, 3 × 30s</td><td>75s</td></tr>
+      <tr><td>Thu</td><td>Legs</td><td>Walking lunges, single-leg RDL, single-leg calf raise</td><td>3 × 10/leg, 3 × 10/leg, 3 × 15/leg</td><td>75s</td></tr>
+      <tr><td>Fri</td><td>Glutes & Core</td><td>Bulgarian split squat, Russian twist, plank</td><td>3 × 8/leg, 3 × 20, 3 × 40s</td><td>75s</td></tr>
+      <tr><td>Sat</td><td>Full body circuit</td><td>15 squats, 10 push-ups, 10 dips, 30s plank, 20 calf raises</td><td>3 rounds</td><td>90s</td></tr>
+      <tr><td>Sun</td><td>Rest 😴</td><td>Walk + stretching</td><td>—</td><td>—</td></tr></table>
+    </div>
+  </div>
+  <div class="level" data-level="adv" hidden>
+    <div class="card week-card"><h3>Week 4 — Advanced 🔴</h3>
+      <p>Goal: high-intensity, advanced variations. Push only what your body allows.</p>
+      <table><tr><th>Day</th><th>Focus</th><th>Exercises</th><th>Sets × Reps</th><th>Rest</th></tr>
+      <tr><td>Mon</td><td>Chest</td><td>Diamond push-ups, dive-bomber push-ups, chair dips (feet elevated)</td><td>4 × 10, 4 × 8, 4 × 12</td><td>90s</td></tr>
+      <tr><td>Tue</td><td>Back & Shoulders</td><td>Archer pull-ups, wall handstand push-ups, elevated pike push-ups</td><td>4 × 5/side, 4 × 5, 3 × 10</td><td>120s</td></tr>
+      <tr><td>Wed</td><td>Arms</td><td>One-arm backpack curls, dive-bombers, one-arm hang</td><td>4 × 6/arm, 4 × 8, 3 × 20s</td><td>90s</td></tr>
+      <tr><td>Thu</td><td>Legs</td><td>Pistol squats, Nordic curls, jump calf raises</td><td>4 × 5/leg, 3 × 5, 4 × 20</td><td>120s</td></tr>
+      <tr><td>Fri</td><td>Glutes & Core</td><td>Single-leg hip thrust, hollow body, hanging leg raises</td><td>4 × 10/leg, 4 × 30s, 4 × 8</td><td>90s</td></tr>
+      <tr><td>Sat</td><td>Advanced full-body circuit</td><td>10 push-ups, 10 squats, 10 lunges/leg, 20 jump calf raises, 30s hollow hold</td><td>4 rounds</td><td>90s</td></tr>
+      <tr><td>Sun</td><td>Rest 😴</td><td>Full recovery + mobility</td><td>—</td><td>—</td></tr></table>
+    </div>
+  </div>
+  <div class="level" data-level="loop" hidden>
+    <div class="card week-card" style="border-left-color:var(--good);"><h3>Week 5, 6, 7, 8… — Keep Repeating ♾️</h3>
+      <p>From Week 5 onward, repeat the <strong>exact same advanced weekly schedule</strong> every week, forever. There is no end date — this is your permanent training routine.</p>
+      <p><strong>How to keep progressing while repeating:</strong></p>
+      <ul style="margin:8px 0 8px 20px; font-size:.92rem;">
+        <li>Add 1–2 reps per set each cycle, or add a set once reps plateau.</li>
+        <li>Slow the tempo (3–4 second lowering) or add a pause at the hardest point.</li>
+        <li>Load a backpack with books/water bottles to increase resistance.</li>
+        <li>Shorten rest by 10s when a workout feels too easy.</li>
+      </ul>
+      <table><tr><th>Day</th><th>Focus</th><th>Exercises</th><th>Sets × Reps</th><th>Rest</th></tr>
+      <tr><td>Mon</td><td>Chest</td><td>Diamond push-ups, dive-bomber push-ups, chair dips (feet elevated)</td><td>4 × 10, 4 × 8, 4 × 12</td><td>90s</td></tr>
+      <tr><td>Tue</td><td>Back & Shoulders</td><td>Archer pull-ups, wall handstand push-ups, elevated pike push-ups</td><td>4 × 5/side, 4 × 5, 3 × 10</td><td>120s</td></tr>
+      <tr><td>Wed</td><td>Arms</td><td>One-arm backpack curls, dive-bombers, one-arm hang</td><td>4 × 6/arm, 4 × 8, 3 × 20s</td><td>90s</td></tr>
+      <tr><td>Thu</td><td>Legs</td><td>Pistol squats, Nordic curls, jump calf raises</td><td>4 × 5/leg, 3 × 5, 4 × 20</td><td>120s</td></tr>
+      <tr><td>Fri</td><td>Glutes & Core</td><td>Single-leg hip thrust, hollow body, hanging leg raises</td><td>4 × 10/leg, 4 × 30s, 4 × 8</td><td>90s</td></tr>
+      <tr><td>Sat</td><td>Advanced full-body circuit</td><td>10 push-ups, 10 squats, 10 lunges/leg, 20 jump calf raises, 30s hollow hold</td><td>4 rounds</td><td>90s</td></tr>
+      <tr><td>Sun</td><td>Rest 😴</td><td>Full recovery + mobility</td><td>—</td><td>—</td></tr></table>
+    </div>
+  </div>
+  <div class="card"><strong>How progression works:</strong> Weeks 1–4 ramp difficulty (easier → harder variations), volume (reps/sets), and rest (60s → 120s). Move up only when you complete all sets and reps with good form. After Week 4, the advanced week becomes your ongoing routine — repeat it indefinitely and use the progression tips above to keep improving. Quality beats quantity, always.</div>
+</section>
+
+<!-- ================= TRACKER ================= -->
+<section class="page" id="tracker">
+  <h2>✅ Daily Target Tracker</h2>
+  <div class="tracker-grid">
+    <div class="card">
+      <h3 style="margin-top:0;">Today's Setup</h3>
+      <p><label class="small" for="daySelect">Pick your day:</label></p>
+      <select id="daySelect"></select>
+      <p style="margin-top:12px;"><label class="small" for="targetInput">Daily target (total points to reach):</label></p>
+      <input class="target-input" type="number" id="targetInput" min="1" value="15">
+      <div style="margin-top:16px;">
+        <div class="small">Completion progress:</div>
+        <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+        <div id="progressText" style="color:var(--muted); font-size:.9rem;">0 / 15 points (0%)</div>
+        <div class="goal-msg" id="goalMsg">🎉 Goal complete! Outstanding work — hydrate, stretch, and see you tomorrow!</div>
+        <button class="btn" id="resetBtn">🔄 Reset Day</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Today's Checklist</h3>
+      <p class="small">Check each exercise as you finish it. Your progress updates live.</p>
+      <div id="checklist"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>Home Workout Hub · Warm up 5 min before every session · Cool down & stretch after · Drink water all day · Stop for pain or dizziness · Consult a healthcare professional if you have health concerns.</footer>
+
+<script>
+// ---------- Tabs ----------
+const tabBtns=document.querySelectorAll('nav.tabs button');
+tabBtns.forEach(b=>b.addEventListener('click',()=>{
+  tabBtns.forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('section.page').forEach(s=>s.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(b.dataset.page).classList.add('active');
+}));
+
+// ---------- Progression pills ----------
+document.querySelectorAll('.pill-row button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.pill-row button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.level').forEach(l=>l.hidden = l.dataset.level!==btn.dataset.level);
+    btn.classList.add('active');
+  });
+});
+
+// ---------- Tracker data ----------
+const days={
+  'Monday — Chest':[
+    {name:'Wall Push-up', pts:2},{name:'Knee Push-up', pts:2},{name:'Standard Push-up', pts:3},
+    {name:'Diamond Push-up', pts:4},{name:'Chair Triceps Dip', pts:3}],
+  'Tuesday — Back & Shoulders':[
+    {name:'Superman Hold', pts:2},{name:'Towel Row', pts:3},{name:'Pull-up / Negative', pts:4},
+    {name:'Pike Push-up', pts:3},{name:'Shoulder Taps', pts:2},{name:'Wall Handstand Push-up', pts:4}],
+  'Wednesday — Arms':[
+    {name:'Towel Curl', pts:2},{name:'Backpack Curl', pts:3},{name:'One-Arm Backpack Curl', pts:4},
+    {name:'Chair Dip', pts:3},{name:'Close-Grip Push-up', pts:3},{name:'Dead Hang', pts:3}],
+  'Thursday — Legs':[
+    {name:'Bodyweight Squat', pts:2},{name:'Walking Lunges', pts:3},{name:'Pistol Squat', pts:5},
+    {name:'Single-Leg RDL', pts:3},{name:'Nordic Curl', pts:5},{name:'Single-Leg Calf Raise', pts:2}],
+  'Friday — Glutes & Core':[
+    {name:'Glute Bridge', pts:2},{name:'Bulgarian Split Squat', pts:4},{name:'Single-Leg Hip Thrust', pts:4},
+    {name:'Plank', pts:2},{name:'Crunches', pts:2},{name:'Russian Twist', pts:3},{name:'Hollow Body Hold', pts:4}],
+  'Saturday — Full Body Circuit':[
+    {name:'Squats', pts:2},{name:'Push-ups', pts:3},{name:'Dips', pts:3},{name:'Plank', pts:2},
+    {name:'Calf Raises', pts:2},{name:'Lunges', pts:3}]
+};
+
+const daySelect=document.getElementById('daySelect');
+const targetInput=document.getElementById('targetInput');
+const checklist=document.getElementById('checklist');
+const progressBar=document.getElementById('progressBar');
+const progressText=document.getElementById('progressText');
+const goalMsg=document.getElementById('goalMsg');
+const resetBtn=document.getElementById('resetBtn');
+
+Object.keys(days).forEach(d=>{const o=document.createElement('option');o.textContent=d;daySelect.appendChild(o);});
+
+function getState(){try{return JSON.parse(localStorage.getItem('hwh')||'{}')}catch(e){return{}}}
+function setState(s){localStorage.setItem('hwh',JSON.stringify(s))}
+
+function render(){
+  const day=daySelect.value;
+  const state=getState();
+  if(!state[day]) state[day]={target:15,done:{}};
+  targetInput.value=state[day].target;
+  checklist.innerHTML='';
+  days[day].forEach((ex,i)=>{
+    const row=document.createElement('div');
+    row.className='check-item'+(state[day].done[i]?' done':'');
+    row.innerHTML=`<input type="checkbox" id="ex${i}" ${state[day].done[i]?'checked':''}><label for="ex${i}"><strong>${ex.name}</strong><br><span class="small">Worth ${ex.pts} points toward today's target</span></label>`;
+    const cb=row.querySelector('input');
+    cb.addEventListener('change',()=>{
+      const s=getState(); s[day].done[i]=cb.checked; setState(s);
+      row.classList.toggle('done',cb.checked); updateProgress();
+    });
+    checklist.appendChild(row);
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  const day=daySelect.value;
+  const s=getState(); if(!s[day]){render();return;}
+  const target=+targetInput.value||1;
+  const score=days[day].reduce((sum,ex,i)=>sum+(s[day].done[i]?ex.pts:0),0);
+  const pct=Math.min(100,Math.round(score/target*100));
+  progressBar.style.width=pct+'%';
+  progressText.textContent=`${score} / ${target} points (${pct}%)`;
+  goalMsg.style.display=pct>=100?'block':'none';
+}
+
+daySelect.addEventListener('change',render);
+targetInput.addEventListener('change',()=>{
+  const s=getState(); if(!s[daySelect.value]){render();return;}
+  s[daySelect.value].target=+targetInput.value||15; setState(s); updateProgress();
+});
+resetBtn.addEventListener('click',()=>{
+  const s=getState(); if(s[daySelect.value]) s[daySelect.value].done={}; setState(s); render();
+});
+
+render();
+</script>
+</body>
+</html>
